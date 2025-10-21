@@ -1,0 +1,11 @@
+{
+  "name": "LIFUWAREHOUSE",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'No build step yet'",
+    "start": "firebase serve"
+  },
+  "dependencies": {
+    "firebase": "^10.0.0"
+  }
+}

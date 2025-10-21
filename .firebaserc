@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "lifu-warehouse",
+    "warehouse": "webapp-99aa2"
+  },
+  "targets": {},
+  "etags": {}
+}
