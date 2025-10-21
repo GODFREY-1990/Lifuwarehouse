@@ -67,9 +67,22 @@
         font-size: 14px;
         color: #555;
       }
-      #dashboard, #inventoryForm {
+      #dashboard, #inventoryForm, #inventoryList {
         display: none;
         margin-top: 20px;
+      }
+      table {
+        margin: auto;
+        background: #fff;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+      }
+      th {
+        cursor: pointer;
+        background: #eee;
       }
     </style>
   </head>
@@ -103,6 +116,22 @@
       <p id="itemStatus"></p>
     </div>
 
+    <div id="inventoryList">
+      <h3>📋 Current Inventory</h3>
+      <table id="inventoryTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)">Item Name 🔽</th>
+            <th onclick="sortTable(1)">Quantity 🔽</th>
+            <th onclick="sortTable(2)">Unit Cost 🔽</th>
+            <th onclick="sortTable(3)">GST 🔽</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryBody"></tbody>
+      </table>
+    </div>
+
     <script>
       const loginForm = document.getElementById("loginForm");
       const loginStatus = document.getElementById("loginStatus");
@@ -114,8 +143,9 @@
       const inventoryForm = document.getElementById("inventoryForm");
       const addItemForm = document.getElementById("addItemForm");
       const itemStatus = document.getElementById("itemStatus");
+      const inventoryBody = document.getElementById("inventoryBody");
+      const inventoryList = document.getElementById("inventoryList");
 
-      // Register user
       registerBtn.addEventListener("click", async () => {
         const email = loginForm.email.value;
         const password = loginForm.password.value;
@@ -133,7 +163,6 @@
         }
       });
 
-      // Login user
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = loginForm.email.value;
@@ -155,23 +184,24 @@
           userRole.textContent = role;
           dashboard.style.display = "block";
           inventoryForm.style.display = "block";
+          inventoryList.style.display = "block";
           loginForm.style.display = "none";
           loginStatus.textContent = "";
+          loadInventory();
         } catch (error) {
           loginStatus.textContent = `❌ Login failed: ${error.message}`;
         }
       });
 
-      // Logout
       logoutBtn.addEventListener("click", async () => {
         await auth.signOut();
         dashboard.style.display = "none";
         inventoryForm.style.display = "none";
+        inventoryList.style.display = "none";
         loginForm.style.display = "block";
         loginStatus.textContent = "👋 Logged out.";
       });
 
-      // Session persistence
       auth.onAuthStateChanged(async (user) => {
         if (user && user.emailVerified) {
           const userDoc = await db.collection("users").doc(user.uid).get();
@@ -181,11 +211,12 @@
           userRole.textContent = role;
           dashboard.style.display = "block";
           inventoryForm.style.display = "block";
+          inventoryList.style.display = "block";
           loginForm.style.display = "none";
+          loadInventory();
         }
       });
 
-      // Add inventory item
       addItemForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const name = itemName.value;
@@ -204,10 +235,11 @@
           });
           itemStatus.textContent = `✅ ${name} added to inventory.`;
           addItemForm.reset();
+          loadInventory();
         } catch (error) {
           itemStatus.textContent = `❌ Failed to add item: ${error.message}`;
         }
       });
-    </script>
-  </body>
-</html>
+
+      async function loadInventory() {
+        const snapshot = await db.collection("
