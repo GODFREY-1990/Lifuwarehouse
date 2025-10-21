@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Inventory Report | Lifuwarehouse</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f4f4f4;
+        color: #333;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .summary {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 40px;
+        flex-wrap: wrap;
+      }
+      .summary div {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        margin: 10px;
+        min-width: 200px;
+      }
+      canvas {
+        max-width: 600px;
+        margin: 30px auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📊 Inventory Reporting Dashboard</h1>
+
+    <div class="summary">
+      <div><strong>Total Items in Stock:</strong> <span id="totalQty">—</span></div>
+      <div><strong>Total Inventory Value:</strong> $<span id="totalValue">—</span></div>
+      <div><strong>Total GST Value:</strong> $<span id="totalGST">—</span></div>
+    </div>
+
+    <canvas id="barChart"></canvas>
+    <canvas id="pieChart"></canvas>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyCN5Lfs8TMjB4PJfYEmGUwpknacOw9d880",
+        authDomain: "webapp-99aa2.firebaseapp.com",
+        projectId: "webapp-99aa2",
+        storageBucket: "webapp-99aa2.firebasestorage.app",
+        messagingSenderId: "833936739405",
+        appId: "1:833936739405:web:2ea61e5d2e2c8f60ab2004",
+        measurementId: "G-ZN7CNMQ4QE"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+
+      async function loadReport() {
+        const snapshot = await db.collection("products").get();
+        const items = snapshot.docs.map(doc => doc.data());
+
+        let totalQty = 0;
+        let totalValue = 0;
+        let totalGST = 0;
+
+        const labels = [];
+        const quantities = [];
+        const values = [];
+
+        items.forEach(item => {
+          const qty = item.quantity || 0;
+          const cost = item.unitCost || 0;
+          const gst = item.gst || 0;
+
+          totalQty += qty;
+          totalValue += qty * cost;
+          totalGST += qty * gst;
+
+          labels.push(item.name);
+          quantities.push(qty);
+          values.push(qty * cost);
+        });
+
+        document.getElementById("totalQty").textContent = totalQty;
+        document.getElementById("totalValue").textContent = totalValue.toFixed(2);
+        document.getElementById("totalGST").textContent = totalGST.toFixed(2);
+
+        new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: {
+            labels,
+            datasets: [{
+              label: "Quantity",
+              data: quantities,
+              backgroundColor: "#42a5f5"
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { display: false },
+              title: { display: true, text: "Quantity per Item" }
+            }
+          }
+        });
+
+        new Chart(document.getElementById("pieChart"), {
+          type: "pie",
+          data: {
+            labels,
+            datasets: [{
+              label: "Inventory Value",
+              data: values,
+              backgroundColor: ["#42a5f5", "#66bb6a", "#ffa726", "#ab47bc"]
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: { display: true, text: "Inventory Value Contribution" }
+            }
+          }
+        });
+      }
+
+      loadReport();
+    </script>
+  </body>
+</html>
