@@ -1,92 +1,149 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Lifuwarehouse App</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lifuwarehouse App</title>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore-compat.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore-compat.js"></script>
 
-    <!-- Initialize Firebase -->
-    <script>
-      const firebaseConfig = {
-        apiKey: "AIzaSyCN5Lfs8TMjB4PJfYEmGUwpknacOw9d880",
-        authDomain: "webapp-99aa2.firebaseapp.com",
-        projectId: "webapp-99aa2",
-        storageBucket: "webapp-99aa2.appspot.com",
-        messagingSenderId: "833936739405",
-        appId: "1:833936739405:web:2ea61e5d2e2c8f60ab2004",
-        measurementId: "G-ZN7CNMQ4QE"
-      };
+  <!-- Chart.js for reports -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-      firebase.initializeApp(firebaseConfig);
-      const auth = firebase.auth();
-      const db = firebase.firestore();
-    </script>
+  <!-- Firebase Config -->
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCN5Lfs8TMjB4PJfYEmGUwpknacOw9d880",
+      authDomain: "webapp-99aa2.firebaseapp.com",
+      projectId: "webapp-99aa2",
+      storageBucket: "webapp-99aa2.appspot.com",
+      messagingSenderId: "833936739405",
+      appId: "1:833936739405:web:2ea61e5d2e2c8f60ab2004",
+      measurementId: "G-ZN7CNMQ4QE"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
 
-    <style>
-      body {
-        font-family: Roboto, Helvetica, Arial, sans-serif;
-        background: #f5f5f5;
-        margin: 0;
-        padding: 0;
-        text-align: center;
-      }
-      h1 {
-        margin-top: 40px;
-        font-weight: 300;
-        color: #333;
-      }
-      form {
-        margin: 20px auto;
-        max-width: 300px;
-        padding: 20px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-      input, button {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 12px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-      }
-      button {
-        background: #039be5;
-        color: white;
-        border: none;
-        cursor: pointer;
-      }
-      #loginStatus {
-        margin-top: 10px;
-        font-size: 14px;
-        color: #555;
-      }
-      #dashboard, #inventoryForm, #inventoryList {
-        display: none;
-        margin-top: 20px;
-      }
-      table {
-        margin: auto;
-        background: #fff;
-        border-collapse: collapse;
-      }
-      th, td {
-        padding: 8px 12px;
-        border: 1px solid #ccc;
-      }
-      th {
-        cursor: pointer;
-        background: #eee;
-      }
-    </style>
-  </head>
-  <body>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: Roboto, sans-serif;
+      margin: 0;
+      background: #f5f5f5;
+      padding: 0;
+      display: flex;
+    }
+    #sidebar {
+      width: 220px;
+      background-color: #039be5;
+      color: white;
+      padding: 20px;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+      display: none;
+    }
+    #sidebar h2 { margin-top: 0; font-weight: 400; }
+    #sidebar ul { list-style: none; padding: 0; }
+    #sidebar ul li { margin: 16px 0; }
+    #sidebar ul li a {
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+    }
+    #sidebar ul li a:hover { text-decoration: underline; }
+    #main {
+      margin-left: 220px;
+      padding: 20px;
+      flex: 1;
+      transition: margin-left 0.3s ease;
+    }
+    h1 { font-weight: 300; color: #333; }
+    form {
+      margin: 20px auto;
+      max-width: 400px;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background: #039be5;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: #0288d1; }
+    #loginStatus, #itemStatus {
+      margin-top: 10px;
+      font-size: 14px;
+      color: #555;
+    }
+    #dashboard, #inventoryForm, #inventoryList, #reportDashboard {
+      display: none;
+      margin-top: 20px;
+    }
+    table {
+      margin: auto;
+      background: #fff;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+    }
+    th { cursor: pointer; background: #eee; }
+    td[contenteditable="true"] { background: #f9f9f9; }
+    #menuToggle {
+      display: none;
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: #039be5;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 4px;
+      z-index: 1000;
+    }
+    @media (max-width: 768px) {
+      #sidebar { transform: translateX(-100%); }
+      #sidebar.active { transform: translateX(0); display: block; }
+      #main { margin-left: 0; padding-top: 60px; }
+      #menuToggle { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <button id="menuToggle">☰</button>
+
+  <div id="sidebar">
+    <h2>Lifuwarehouse</h2>
+    <ul>
+      <li><a href="#" onclick="showSection('dashboard')">🏠 Dashboard</a></li>
+      <li><a href="#" onclick="showSection('inventoryForm')">📦 Add Inventory</a></li>
+      <li><a href="#" onclick="showSection('inventoryList')">📋 Inventory List</a></li>
+      <li><a href="#" onclick="showSection('reportDashboard')">📊 Reports</a></li>
+    </ul>
+  </div>
+
+  <div id="main">
     <h1>🚀 Lifuwarehouse App</h1>
 
     <form id="loginForm">
@@ -134,102 +191,272 @@
       </table>
     </div>
 
-    <script>
-      const loginForm = document.getElementById("loginForm");
-      const loginStatus = document.getElementById("loginStatus");
-      const registerBtn = document.getElementById("registerBtn");
-      const dashboard = document.getElementById("dashboard");
-      const userEmail = document.getElementById("userEmail");
-      const userRole = document.getElementById("userRole");
-      const logoutBtn = document.getElementById("logoutBtn");
-      const inventoryForm = document.getElementById("inventoryForm");
-      const addItemForm = document.getElementById("addItemForm");
-      const itemStatus = document.getElementById("itemStatus");
-      const inventoryBody = document.getElementById("inventoryBody");
-      const inventoryList = document.getElementById("inventoryList");
+    <div id="reportDashboard">
+      <h3>📊 Inventory Reports</h3>
+      <canvas id="reportChart" width="600" height="300"></canvas>
+      <div id="reportSummary"></div>
+    </div>
+  </div>
 
-      registerBtn.addEventListener("click", async () => {
-        const email = loginForm.email.value;
-        const password = loginForm.password.value;
+<script>
+const loginForm = document.getElementById("loginForm");
+const loginStatus = document.getElementById("loginStatus");
+const registerBtn = document.getElementById("registerBtn");
+const dashboard = document.getElementById("dashboard");
+const userEmail = document.getElementById("userEmail");
+const userRole = document.getElementById("userRole");
+const logoutBtn = document.getElementById("logoutBtn");
+const inventoryForm = document.getElementById("inventoryForm");
+const addItemForm = document.getElementById("addItemForm");
+const itemStatus = document.getElementById("itemStatus");
+const inventoryBody = document.getElementById("inventoryBody");
+const inventoryList = document.getElementById("inventoryList");
+const reportDashboard = document.getElementById("reportDashboard");
+const menuToggle = document.getElementById("menuToggle");
+const sidebar = document.getElementById("sidebar");
 
-        try {
-          const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-          const user = userCredential.user;
+// Sidebar toggle for mobile
+menuToggle.addEventListener("click", () => {
+  sidebar.classList.toggle("active");
+});
 
-          await user.sendEmailVerification();
-          await db.collection("users").doc(user.uid).set({ role: "staff" });
+// Register new user
+registerBtn.addEventListener("click", async () => {
+  const email = loginForm.email.value;
+  const password = loginForm.password.value;
 
-          loginStatus.textContent = `✅ Registered as ${user.email}. Verification email sent.`;
-        } catch (error) {
-          loginStatus.textContent = `❌ Registration failed: ${error.message}`;
-        }
-      });
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    await user.sendEmailVerification();
+    await db.collection("users").doc(user.uid).set({ role: "staff" });
+    loginStatus.textContent = `✅ Registered as ${user.email}. Verification email sent.`;
+  } catch (error) {
+    loginStatus.textContent = `❌ Registration failed: ${error.message}`;
+  }
+});
 
-      loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = loginForm.email.value;
-        const password = loginForm.password.value;
+// Login existing user
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = loginForm.email.value;
+  const password = loginForm.password.value;
 
-        try {
-          const userCredential = await auth.signInWithEmailAndPassword(email, password);
-          const user = userCredential.user;
+  try {
+    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+    const user = userCredential.user;
 
-          if (!user.emailVerified) {
-            loginStatus.textContent = "❌ Please verify your email before continuing.";
-            return;
-          }
+    if (!user.emailVerified) {
+      loginStatus.textContent = "❌ Please verify your email before continuing.";
+      return;
+    }
 
-          const userDoc = await db.collection("users").doc(user.uid).get();
-          const role = userDoc.exists ? userDoc.data().role : "unknown";
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    const role = userDoc.exists ? userDoc.data().role : "unknown";
 
-          userEmail.textContent = user.email;
-          userRole.textContent = role;
-          dashboard.style.display = "block";
-          inventoryForm.style.display = "block";
-          inventoryList.style.display = "block";
-          loginForm.style.display = "none";
-          loginStatus.textContent = "";
-          loadInventory();
-        } catch (error) {
-          loginStatus.textContent = `❌ Login failed: ${error.message}`;
-        }
-      });
+    userEmail.textContent = user.email;
+    userRole.textContent = role;
 
-      logoutBtn.addEventListener("click", async () => {
-        await auth.signOut();
-        dashboard.style.display = "none";
-        inventoryForm.style.display = "none";
-        inventoryList.style.display = "none";
-        loginForm.style.display = "block";
-        loginStatus.textContent = "👋 Logged out.";
-      });
+    sidebar.style.display = "block";
+    dashboard.style.display = "block";
+    loginForm.style.display = "none";
+    inventoryForm.style.display = "none";
+    inventoryList.style.display = "none";
+    reportDashboard.style.display = "none";
+    loginStatus.textContent = "";
 
-      addItemForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const name = itemName.value;
-        const quantity = parseInt(quantity.value);
-        const unitCost = parseFloat(unitCost.value);
-        const gstValue = parseFloat(gst.value);
+    loadInventory();
+  } catch (error) {
+    loginStatus.textContent = `❌ Login failed: ${error.message}`;
+  }
+});
 
-        try {
-          await db.collection("products").add({
-            name,
-            quantity,
-            unitCost,
-            gst: gstValue,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          itemStatus.textContent = `✅ ${name} added to inventory.`;
-          addItemForm.reset();
-          loadInventory();
-        } catch (error) {
-          itemStatus.textContent = `❌ Failed to add item: ${error.message}`;
-        }
-      });
+// Logout
+logoutBtn.addEventListener("click", async () => {
+  await auth.signOut();
+  sidebar.style.display = "none";
+  dashboard.style.display = "none";
+  inventoryForm.style.display = "none";
+  inventoryList.style.display = "none";
+  reportDashboard.style.display = "none";
+  loginForm.style.display = "block";
+  loginStatus.textContent = "👋 Logged out.";
+});
 
-      async function loadInventory() {
-        const snapshot = await db.collection("products").get();
-        inventoryBody.innerHTML = "";
+// Add inventory item
+addItemForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-        snapshot.forEach
+  const name = itemName.value.trim();
+  const quantity = parseInt(quantity.value);
+  const unitCost = parseFloat(unitCost.value);
+  const gstValue = parseFloat(gst.value);
+
+  if (!name || isNaN(quantity) || isNaN(unitCost) || isNaN(gstValue)) {
+    itemStatus.textContent = "❌ Please fill out all fields correctly.";
+    return;
+  }
+
+  try {
+    await db.collection("products").add({
+      name,
+      quantity,
+      unitCost,
+      gst: gstValue,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    itemStatus.textContent = `✅ ${name} added to inventory.`;
+    addItemForm.reset();
+    showSection("inventoryList");
+    loadInventory();
+  } catch (error) {
+    itemStatus.textContent = `❌ Failed to add item: ${error.message}`;
+  }
+});
+
+// Load inventory items
+async function loadInventory() {
+  try {
+    const snapshot = await db.collection("products").orderBy("createdAt", "desc").get();
+    inventoryBody.innerHTML = "";
+
+    snapshot.forEach(doc => {
+      const item = doc.data();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td contenteditable="true">${item.name}</td>
+        <td contenteditable="true">${item.quantity}</td>
+        <td contenteditable="true">${item.unitCost}</td>
+        <td contenteditable="true">${item.gst}</td>
+        <td>
+          <button onclick="updateItem('${doc.id}', this)">💾</button>
+          <button onclick="deleteItem('${doc.id}')">🗑️</button>
+        </td>
+      `;
+      inventoryBody.appendChild(row);
+    });
+  } catch (error) {
+    console.error("❌ Failed to load inventory:", error);
+  }
+}
+
+// Filter inventory by search
+function filterInventory() {
+  const filter = document.getElementById("searchInput").value.toLowerCase();
+  const rows = inventoryBody.getElementsByTagName("tr");
+  for (let row of rows) {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(filter) ? "" : "none";
+  }
+}
+
+// Sort inventory table
+function sortTable(columnIndex) {
+  const rows = Array.from(inventoryBody.rows);
+  const sorted = rows.sort((a, b) => {
+    const aText = a.cells[columnIndex].textContent.trim();
+    const bText = b.cells[columnIndex].textContent.trim();
+    return aText.localeCompare(bText, undefined, { numeric: true });
+  });
+  inventoryBody.innerHTML = "";
+  sorted.forEach(row => inventoryBody.appendChild(row));
+}
+
+// Export inventory to CSV
+function exportInventory() {
+  const rows = inventoryBody.getElementsByTagName("tr");
+  let csv = "Item Name,Quantity,Unit Cost,GST\n";
+  for (let row of rows) {
+    if (row.style.display === "none") continue;
+    const cells = row.getElementsByTagName("td");
+    const line = Array.from(cells).slice(0, 4).map(cell => `"${cell.textContent.trim()}"`).join(",");
+    csv += line + "\n";
+  }
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "inventory.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Update inventory item
+async function updateItem(id, button) {
+  const row = button.closest("tr");
+  const [name, quantity, unitCost, gst] = Array.from(row.cells).slice(0, 4).map(cell => cell.textContent.trim());
+  try {
+    await db.collection("products").doc(id).update({
+      name,
+      quantity: parseInt(quantity),
+      unitCost: parseFloat(unitCost),
+      gst: parseFloat(gst),
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    alert("✅ Item updated.");
+  } catch (error) {
+    alert("❌ Update failed: " + error.message);
+  }
+}
+
+// Delete inventory item
+async function deleteItem(id) {
+  if (confirm("Are you sure you want to delete this item?")) {
+    try {
+      await db.collection("products").doc(id).delete();
+      loadInventory();
+    } catch (error) {
+      alert("❌ Delete failed: " + error.message);
+    }
+  }
+}
+
+// Show specific section
+function showSection(id) {
+  dashboard.style.display = "none";
+  inventoryForm.style.display = "none";
+  inventoryList.style.display = "none";
+  reportDashboard.style.display = "none";
+
+  const section = document.getElementById(id);
+  if (section) section.style.display = "block";
+
+  if (id === "reportDashboard") loadReportDashboard();
+}
+
+// Load report dashboard
+async function loadReportDashboard() {
+  const snapshot = await db.collection("products").get();
+  let totalValue = 0;
+  let totalGST = 0;
+  const labels = [];
+  const values = [];
+
+  snapshot.forEach(doc => {
+    const item = doc.data();
+    const itemTotal = item.quantity * item.unitCost;
+    totalValue += itemTotal;
+    totalGST += item.gst;
+    labels.push(item.name);
+    values.push(itemTotal);
+  });
+
+  document.getElementById("reportSummary").innerHTML = `
+    <p><strong>Total Inventory Value:</strong> PGK ${totalValue.toFixed(2)}</p>
+    <p><strong>Total GST:</strong> PGK ${totalGST.toFixed(2)}</p>
+  `;
+
+  new Chart(document.getElementById("reportChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        label: "Inventory Value (PGK)",
+        data: values,
+        backgroundColor: "#039
+
+</script>
+</body>
+</html>
