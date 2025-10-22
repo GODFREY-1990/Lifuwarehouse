@@ -16,7 +16,7 @@
         apiKey: "AIzaSyCN5Lfs8TMjB4PJfYEmGUwpknacOw9d880",
         authDomain: "webapp-99aa2.firebaseapp.com",
         projectId: "webapp-99aa2",
-        storageBucket: "webapp-99aa2.firebasestorage.app",
+        storageBucket: "webapp-99aa2.appspot.com",
         messagingSenderId: "833936739405",
         appId: "1:833936739405:web:2ea61e5d2e2c8f60ab2004",
         measurementId: "G-ZN7CNMQ4QE"
@@ -118,6 +118,7 @@
 
     <div id="inventoryList">
       <h3>📋 Current Inventory</h3>
+      <input type="text" id="searchInput" placeholder="🔍 Search items..." oninput="filterInventory()" style="margin-bottom: 12px; padding: 8px; width: 300px;" />
       <table id="inventoryTable">
         <thead>
           <tr>
@@ -131,6 +132,7 @@
         <tbody id="inventoryBody"></tbody>
       </table>
     </div>
+
 
     <script>
       const loginForm = document.getElementById("loginForm");
@@ -202,21 +204,6 @@
         loginStatus.textContent = "👋 Logged out.";
       });
 
-      auth.onAuthStateChanged(async (user) => {
-        if (user && user.emailVerified) {
-          const userDoc = await db.collection("users").doc(user.uid).get();
-          const role = userDoc.exists ? userDoc.data().role : "unknown";
-
-          userEmail.textContent = user.email;
-          userRole.textContent = role;
-          dashboard.style.display = "block";
-          inventoryForm.style.display = "block";
-          inventoryList.style.display = "block";
-          loginForm.style.display = "none";
-          loadInventory();
-        }
-      });
-
       addItemForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         const name = itemName.value;
@@ -233,13 +220,4 @@
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           });
-          itemStatus.textContent = `✅ ${name} added to inventory.`;
-          addItemForm.reset();
-          loadInventory();
-        } catch (error) {
-          itemStatus.textContent = `❌ Failed to add item: ${error.message}`;
-        }
-      });
-
-      async function loadInventory() {
-        const snapshot = await db.collection("
+          itemStatus
