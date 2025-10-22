@@ -229,4 +229,7 @@
       });
 
       async function loadInventory() {
-        const snapshot = await
+        const snapshot = await db.collection("products").get();
+        inventoryBody.innerHTML = "";
+
+        snapshot.forEach
